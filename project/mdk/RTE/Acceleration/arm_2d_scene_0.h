@@ -22,6 +22,7 @@
 /*============================ INCLUDES ======================================*/
 
 #include "arm_2d.h"
+#include "snake.h"
 
 #ifdef RTE_Acceleration_Arm_2D_Scene0
 
@@ -73,7 +74,7 @@ extern "C" {
  * \brief a user class for scene 0
  */
 typedef struct user_scene_0_t user_scene_0_t;
-
+ 
 struct user_scene_0_t {
     implement(arm_2d_scene_t);                                                  //! derived from class: arm_2d_scene_t
 
@@ -84,8 +85,15 @@ ARM_PRIVATE(
 		
 )
     /* place your public member here */
+		struct TSnake *scene_snake;
+		
+		int g_level;
 		int64_t lTimestamp[2];
     uint16_t hwProgress;
+		int size;
+		int ffood;
+		int game_status;
+		struct TFood *pfood;
 };
 
 /*============================ GLOBAL VARIABLES ==============================*/
@@ -94,7 +102,7 @@ ARM_PRIVATE(
 ARM_NONNULL(1)
 extern
 user_scene_0_t *__arm_2d_scene0_init(   arm_2d_scene_player_t *ptDispAdapter, 
-                                        user_scene_0_t *ptScene);
+                                        user_scene_0_t *ptThis);
 
 #if defined(__clang__)
 #   pragma clang diagnostic pop

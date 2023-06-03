@@ -2,16 +2,14 @@
 #include <snake.h>
 #include <stdlib.h>
 #include "DEV_Config.h"
+#include "arm_2d_scene_0.h"
 
-//TBool findfood = False;
-//struct TFood picfood;
 
-int refreshgamew(const arm_2d_tile_t *ptTarget, struct TSnake *psnake)
+user_scene_0_t *gameScene = NULL;
+// struct TFood *pfood = NULL;
+
+int refreshgamew(user_scene_0_t *ptTarget, struct TSnake *psnake)
 {
-    static TBool ffood = False;
-    static struct TFood pfood;
-
-  
     int key = -1;
 
     if(!dev_read_key(KEY_RIGHT)){
@@ -38,30 +36,19 @@ int refreshgamew(const arm_2d_tile_t *ptTarget, struct TSnake *psnake)
 		if(arm_2d_helper_is_time_out(300))
 		{
 			movesnake(psnake);
-//			printf("the x, y is %d, %d \n", psnake->head->x, psnake->head->y);
-//			printf("come here to move\n");
 		}
 
-    drawsnakew(ptTarget, psnake, food_size);
-
-    if (!ffood) {
-        drawfoodw(ptTarget, &pfood, psnake);
-        ffood = True;
-    } else {
-				mvwaddch(ptTarget, pfood.x, pfood.y, food_size);
-		}
-    switch (checksnake(&pfood, psnake)) {
+    switch (checksnake(ptTarget->pfood, psnake)) {
     case 0:
         break;
 		
     case 1:
-        ffood = False;
-        if (++g_level > MAXLEVEL) {
-            gameover(ptTarget, "Win!!!");
+        ptTarget->ffood = False;
+        if (++(ptTarget->g_level) > MAXLEVEL) {
             return 3;
         }
         arm_2d_op_wait_async(NULL);
-        snakegrowup(&pfood, psnake);
+        snakegrowup(ptTarget->pfood, psnake);
         break;
           
     default:
@@ -115,20 +102,20 @@ int checksnake(struct TFood *pfood, struct TSnake *psnake)
 	if ( psnake->head->y < 0 || psnake->head->y > GAMEWIN_YLEN
       || psnake->head->x < 0 || psnake->head->x > GAMEWIN_XLEN)
     {
-			  LOG_HERE;
+			  // LOG_HERE;
         return -1;
     }
   
     struct TSnakeNode *pnode = GetSnakeTail(psnake);
     int i = 0;
     for (; i < psnake->length - 1; ++i, pnode = pnode->front) 
-	{
-		 if (psnake->head->y == pnode->y && psnake->head->x == pnode->x)
+		{
+				if (psnake->head->y == pnode->y && psnake->head->x == pnode->x)
 				{
-					LOG_HERE;
+					// LOG_HERE;
 					return -1;
 				}
-	}
+		}
        
     if (psnake->head->y == pfood->y && psnake->head->x == pfood->x)
         return 1;
@@ -216,7 +203,6 @@ void gameover(const arm_2d_tile_t *ptTarget, char *str)
   
 const arm_2d_tile_t* newgamew(const arm_2d_tile_t *ptTarget)
 {
-		g_level = 1;
 		arm_2d_fill_colour(ptTarget, NULL, GLCD_COLOR_WHITE);
       
     return ptTarget;
@@ -292,7 +278,7 @@ void mvwaddch(const arm_2d_tile_t *ptTarget,
 }
   
 // void drawsnakew(const arm_2d_tile_t *ptTarget, struct TSnake *psnake, const int size, struct TFood *pfood, bool flag)
-void drawsnakew(const arm_2d_tile_t *ptTarget, struct TSnake *psnake, const int size)
+void drawsnakew(const arm_2d_tile_t *ptTarget, TSnake *psnake, const int size)
 {
     static int taily = 0;
     static int tailx = 0;
@@ -321,16 +307,15 @@ void drawsnakew(const arm_2d_tile_t *ptTarget, struct TSnake *psnake, const int 
     arm_2d_op_wait_async(NULL);
 }
   
-void drawfoodw(const arm_2d_tile_t *ptTarget, struct TFood *pfood, struct TSnake *psnake)
+void drawfoodw(struct TFood *pfood, struct TSnake *psnake)
 {
+	int y,x;
     do {
-        pfood->y = (rand() % (GAMEWIN_YLEN / food_size)) * food_size;
-        pfood->x = (rand() % (GAMEWIN_XLEN / food_size)) * food_size;
-			  printf("the pfood x, y is %d, %d\n", pfood->x, pfood->y);
+         pfood->y = (rand() % (GAMEWIN_YLEN / food_size)) * food_size;
+         pfood->x = (rand() % (GAMEWIN_XLEN / food_size)) * food_size;
     } while (False == checkfood(pfood, psnake));
-    checkfood(pfood, psnake);
-      
-    mvwaddch(ptTarget, pfood->x, pfood->y, food_size);
+
+		printf("the pfood x, y is %d, %d\n", pfood->x, pfood->y);
     arm_2d_op_wait_async(NULL);
 }
 
@@ -340,10 +325,11 @@ TBool checkfood(struct TFood *pfood, struct TSnake *psnake)
     struct TSnakeNode *pnode = GetSnakeTail(psnake);
   
     int i = 0;
-    for (; i < psnake->length; ++i, pnode = pnode->front)
-        if (pfood->y == pnode->y && pfood->x == pnode->x)
+    for (; i < psnake->length; ++i, pnode = pnode->front) 
+		{
+				if (pfood->y == pnode->y && pfood->x == pnode->x)
             return False;
-  
+		}
     return True;
 }
 

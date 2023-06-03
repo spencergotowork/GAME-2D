@@ -170,7 +170,13 @@ int main(void)
     arm_2d_init();
     disp_adapter0_init();
 		
-		arm_2d_scene0_init(&DISP0_ADAPTER);
+		/* init game */
+		while (NULL == gameScene) {
+				gameScene = (user_scene_0_t *)malloc(sizeof(user_scene_0_t));
+		}
+    memset(gameScene, 0, sizeof(user_scene_0_t));
+		arm_2d_scene0_init(&DISP0_ADAPTER, gameScene);
+		
 		/* switch mode */
     arm_2d_scene_player_set_switching_mode( 
         &DISP0_ADAPTER,
@@ -182,20 +188,37 @@ int main(void)
 		arm_2d_scene_player_switch_to_next_scene(&DISP0_ADAPTER);
 #endif
 
-		// game init
-		extern struct TSnake *psnake;
-		psnake = initsnake(); 
-		
+		// game start
     while (true) {
-        breath_led();
-
+      breath_led();
+			int res = refreshgamew(gameScene, gameScene->scene_snake);
+			if( res > 0)
+			{
+					if(res == 2) gameScene->game_status = GAME_END;
+					if(res == 3) gameScene->game_status = GAME_WIN;
+			}
+			else 
+			{
+					gameScene->game_status = GAME_WRONG;
+			}
+			
+			// choose food
+			if (!gameScene->ffood) {
+					drawfoodw(gameScene->pfood, gameScene->scene_snake);
+					gameScene->ffood = True;
+			} 
+			gameScene->pfood->x=80;
+			gameScene->pfood->y=80;
+			// game restart
+			if(gameScene->game_status == GAME_END) 
+			{
+					destroysnake(gameScene->scene_snake);
+					gameScene->scene_snake = initsnake(); 
+			}
+			
 #if defined(__RTE_ACCELERATION_ARM_2D__) || defined(RTE_Acceleration_Arm_2D)
-        disp_adapter0_task();
+      disp_adapter0_task();
 #endif
-        //gpio_put(PICO_DEFAULT_LED_PIN, 1);
-        //sleep_ms(500);
-        //gpio_put(PICO_DEFAULT_LED_PIN, 0);
-        //sleep_ms(500);
     }
     //return 0;
 }

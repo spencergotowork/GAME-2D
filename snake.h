@@ -1,3 +1,5 @@
+#ifndef SNAKE_H
+#define SNAKE_H
 #include <stdio.h>
 #include "arm_2d_scene_0.h"
 #include "arm_2d_helper.h"
@@ -18,9 +20,11 @@
   
 #define GetSnakeTail(s)  ((s)->head->front)
 
-static uint16_t g_level;
-static uint16_t GAMEWIN_XLEN = __GLCD_CFG_SCEEN_WIDTH__;
-static uint16_t GAMEWIN_YLEN = __GLCD_CFG_SCEEN_HEIGHT__;
+#define GAMEWIN_XLEN __GLCD_CFG_SCEEN_WIDTH__
+#define GAMEWIN_YLEN __GLCD_CFG_SCEEN_HEIGHT__
+
+extern struct user_scene_0_t *gameScene;
+// extern struct TFood *pfood;
 
 enum TDirection {
     DIR_UP,
@@ -29,38 +33,48 @@ enum TDirection {
     DIR_RIGHT
 };
   
-struct TFood {
+typedef struct TFood {
     int y;
     int x;
-};
+} TFood;
   
-struct TSnakeNode {
+typedef struct TSnakeNode {
     int y;
     int x;
     struct TSnakeNode *front;
-};
+} TSnakeNode;
   
-struct TSnake {
+typedef struct TSnake {
     int    length;
     struct TSnakeNode *head;
     enum   TDirection  dir;
+} TSnake;
+
+enum GAME_STATUS {
+    GAME_START,
+    GAME_PLAYING,
+    GAME_WRONG,
+    GAME_END,
+		GAME_WIN
 };
 
-int refreshgamew(const arm_2d_tile_t *ptTarget, struct TSnake *psnake);
+int refreshgamew(user_scene_0_t *ptTarget, struct TSnake *psnake);
 void movesnake(struct TSnake *psnake);
 int checksnake(struct TFood *pfood, struct TSnake *psnake);
 void snakegrowup(struct TFood *pfood, struct TSnake *psnake);
-void gameover(const arm_2d_tile_t *ptTarget, char *str);
+
 struct TSnakeNode *newsnakenode(struct TSnakeNode **ppsnode, int y, int x);
 const arm_2d_tile_t* newgamew(const arm_2d_tile_t *ptTarget);
 struct TSnake* initsnake();
 void destroysnake(struct TSnake *psnake);
+
+void gameover(const arm_2d_tile_t *ptTarget, char *str);
 void drawsnakew(const arm_2d_tile_t *ptTarget, struct TSnake *psnake, const int size);
-void drawfoodw(const arm_2d_tile_t *ptTarget, struct TFood *pfood, struct TSnake *psnake);
+void drawfoodw(TFood *pfood,  TSnake *psnake);
+void mvwaddch(const arm_2d_tile_t *ptTarget,const int xx, const int yy,const int size);
 
 TBool checkfood(struct TFood *pfood, struct TSnake *psnake);
 const arm_2d_tile_t* newlogw();
-void runlog(const arm_2d_tile_t *ptTarget, char *str);
-void cleanline(const arm_2d_tile_t *ptTarget, int y, int x);
-void mvwaddch(const arm_2d_tile_t *ptTarget,const int xx, const int yy,const int size);
-extern struct TSnake *psnake;
+void runlog(struct user_scene_0_t *ptTarget, char *str);
+void cleanline(struct user_scene_0_t *ptTarget, int y, int x);
+#endif

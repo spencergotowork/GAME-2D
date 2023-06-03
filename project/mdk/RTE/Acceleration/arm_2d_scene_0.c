@@ -23,7 +23,7 @@
 #ifdef RTE_Acceleration_Arm_2D_Scene0
 
 #define __USER_SCENE0_IMPLEMENT__
-#include "arm_2d_scene_0.h"
+// #include "arm_2d_scene_0.h"
 
 #include "arm_2d_helper.h"
 #include "arm_extra_controls.h"
@@ -93,7 +93,7 @@ extern const arm_2d_tile_t c_tileCMSISLogoA4Mask;
 /*============================ PROTOTYPES ====================================*/
 /*============================ LOCAL VARIABLES ===============================*/
 /*============================ IMPLEMENTATION ================================*/
-struct TSnake *psnake = NULL;
+// struct TSnake *psnake = NULL;
 
 static void __on_scene0_depose(arm_2d_scene_t *ptScene)
 {
@@ -143,17 +143,16 @@ static void __on_scene0_frame_complete(arm_2d_scene_t *ptScene)
     user_scene_0_t *ptThis = (user_scene_0_t *)ptScene;
     ARM_2D_UNUSED(ptThis);
 																					
-    /* switch to next scene after 3s */
-    if (arm_2d_helper_is_time_out(99999999 /* 3000 */, &this.lTimestamp[0])) {
-        arm_2d_scene_player_switch_to_next_scene(ptScene->ptPlayer);
-    }
+//    /* switch to next scene after 3s */
+//    if (arm_2d_helper_is_time_out(99999999 /* 3000 */, &this.lTimestamp[0])) {
+//        arm_2d_scene_player_switch_to_next_scene(ptScene->ptPlayer);
+//    }
 }
 
 static void __before_scene0_switching_out(arm_2d_scene_t *ptScene)
 {
     user_scene_0_t *ptThis = (user_scene_0_t *)ptScene;
     ARM_2D_UNUSED(ptThis);
-
 }
 
 static
@@ -175,73 +174,51 @@ IMPL_PFB_ON_DRAW(__pfb_draw_scene0_background_handler)
 static
 IMPL_PFB_ON_DRAW(__pfb_draw_scene0_handler)
 {
-    // ARM_2D_UNUSED(pTarget);
-    ARM_2D_UNUSED(ptTile);
+    user_scene_0_t *ptThis = (user_scene_0_t *)pTarget;
+    // ARM_2D_UNUSED(ptTile);
     ARM_2D_UNUSED(bIsNewFrame);
-
-		static int16_t xx = 20, yy = 20;  // origin head point
-		static int16_t snake_width = 20;	// snake width
-		static int game_status = 1;
 	
-		// gameover(ptTile, "NEW GAME BEGIN");
+		arm_2d_fill_colour(ptTile, NULL, GLCD_COLOR_BLUE);
+		arm_2d_op_wait_async(NULL);
 		
-		// drawsnakew(ptTile, psnake, food_size);
-	arm_2d_fill_colour(ptTile, NULL, GLCD_COLOR_BLUE);
-	arm_2d_op_wait_async(NULL);
-int res;
-	
-		switch (game_status) 
+		int res;
+		switch (ptThis->game_status) 
 		{
-			case 0:
-				gameover(ptTile, "GAME BAD");
-				game_status = 2;
+			case GAME_START:
+				// start graph
+				gameover(ptTile, "NEW GAME BEGIN");
+				ptThis->game_status = GAME_PLAYING;
 				break;
-			case 1:
-				res = refreshgamew(ptTile, psnake);
-				if( res > 0)
-				{
-					if(res == 2) game_status = 2;
-					arm_2d_op_wait_async(NULL);
-					return arm_fsm_rt_cpl;
-				}
-				else 
-				{
-					game_status = 0;
-				}
+			
+			case GAME_PLAYING:		
+				// draw snake 
+				drawsnakew(ptTile, ptThis->scene_snake, food_size);
+				// draw food
+				mvwaddch(ptTile, ptThis->pfood->x, ptThis->pfood->y, food_size);
 				break;
-			case 2:
-				destroysnake(psnake);
-				psnake = initsnake(); 
-				game_status = 1;
+				
+			case GAME_WRONG:
+				// false graph
+				gameover(ptTile, "YOU FALSE\n PUSH B");
+				ptThis->game_status = GAME_END;
 				break;
-			case 3:
+			
+			case GAME_END:
+				ptThis->game_status = GAME_START;
+				break;
+			
+			case GAME_WIN:
+				// win graph
 				gameover(ptTile, "Win!!!");
+				ptThis->game_status = GAME_START;
 				break;
+
 			default:
 				break;
 		}
-//		//  game start
-//    if(game_status)
-//		{
-//			if(refreshgamew(ptTile, psnake) > 0)
-//			{
-//				arm_2d_op_wait_async(NULL);
-//				return arm_fsm_rt_cpl;
-//			}
-//			else
-//			{
-//				game_status = false;
-//			}
-//			
-//		}
-//		else {
-//			gameover(ptTile, "GAME END");
-//			free(psnake);
-//		}
-		
+		pTarget = ptThis;
 		arm_2d_op_wait_async(NULL);
 		return arm_fsm_rt_cpl;
-			
 }
 
 ARM_NONNULL(1)
@@ -289,17 +266,16 @@ user_scene_0_t *__arm_2d_scene0_init(   arm_2d_scene_player_t *ptDispAdapter,
 //    }
     
     if (NULL == ptThis) {
-        ptThis = (user_scene_0_t *)malloc(sizeof(user_scene_0_t));
-        assert(NULL != ptThis);
-        if (NULL == ptThis) {
-            return NULL;
-        }
+//        ptThis = (user_scene_0_t *)malloc(sizeof(user_scene_0_t));
+//        assert(NULL != ptThis);
+//        if (NULL == ptThis) {
+//            return NULL;
+//        }
     } else {
         bUserAllocated = true;
     }
-    memset(ptThis, 0, sizeof(user_scene_0_t));
-
-
+//    memset(ptThis, 0, sizeof(user_scene_0_t));
+		
     *ptThis = (user_scene_0_t){
         .use_as__arm_2d_scene_t = {
             /* Please uncommon the callbacks if you need them
@@ -318,6 +294,14 @@ user_scene_0_t *__arm_2d_scene0_init(   arm_2d_scene_player_t *ptDispAdapter,
         },
         .bUserAllocated = bUserAllocated,
     };
+
+		// environment init
+		ptThis->scene_snake = initsnake(); 
+		ptThis->ffood			  = False;
+		ptThis->size 				= food_size;
+		ptThis->pfood->x		= 80;
+		ptThis->pfood->y		= 80;
+		ptThis->game_status = GAME_START;
 
     arm_2d_scene_player_append_scenes(  ptDispAdapter, 
                                         &this.use_as__arm_2d_scene_t, 
