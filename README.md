@@ -1,3 +1,6 @@
+Thanks to [GorgonMeducer](https://github.com/GorgonMeducer) for his excellent work.
+Here are the instructions based on pico_template.
+
 ## Support the latest pico-sdk (v1.5.0)
 - The code is developed based on [Pico_Template](https://github.com/GorgonMeducer/Pico_Template)
 
@@ -30,20 +33,19 @@
 
 ## 1. Get the code
 
-I assume that you have the lastest MDK installed on your PC. Please clone the code with following command line:
+Get the MDK [here](https://developer.arm.com/Tools%20and%20Software/Keil%20MDK) and install. Please clone the code with following command line:
 
 ```
 mkdir game-snake
-cd pico-snake
+cd game-snake
 
 git clone https://github.com/spencergotowork/GAME-2D.git .
 
-git submodule update --init
 ```
 
 ## 2. Use the demo
 
-The MDK project could be found in the path "ROOT\project\mdk". I assume you know how to use MDK for normal compilation. 
+The MDK project could be found in the path "ROOT\project\mdk". Use MDK to open, compile, and download it to your pico. 
 
 ### 2.1 How to set the Stack and Heap size
 
