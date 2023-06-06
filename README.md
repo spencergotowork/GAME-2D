@@ -10,4 +10,4 @@
 - [ ] 脏矩阵优化加速
 
 **TO BE FIXED**:
-- [ ] arm_2d_scene0_*内的pfood结构体坐标无法更改
+- [x] arm_2d_scene0_*内的pfood结构体坐标无法更改
