@@ -23,7 +23,7 @@
 #ifdef RTE_Acceleration_Arm_2D_Scene0
 
 #define __USER_SCENE0_IMPLEMENT__
-// #include "arm_2d_scene_0.h"
+#include "arm_2d_scene_0.h"
 
 #include "arm_2d_helper.h"
 #include "arm_extra_controls.h"
@@ -32,7 +32,6 @@
 #include <string.h>
 
 #include "DEV_Config.h"
-#include "snake.h"
 
 #if defined(__clang__)
 #   pragma clang diagnostic push
@@ -299,6 +298,7 @@ user_scene_0_t *__arm_2d_scene0_init(   arm_2d_scene_player_t *ptDispAdapter,
 		ptThis->scene_snake = initsnake(); 
 		ptThis->ffood			  = False;
 		ptThis->size 				= food_size;
+		ptThis->pfood				= (struct TFood *)malloc(sizeof(struct TFood));
 		ptThis->pfood->x		= 80;
 		ptThis->pfood->y		= 80;
 		ptThis->game_status = GAME_START;

@@ -1,19 +1,19 @@
 /****************************************************************************
-*  Copyright 2021 Gorgon Meducer (Email:embedded_zhuoran@hotmail.com)       *
-*                                                                           *
-*  Licensed under the Apache License, Version 2.0 (the "License");          *
-*  you may not use this file except in compliance with the License.         *
-*  You may obtain a copy of the License at                                  *
-*                                                                           *
-*     http://www.apache.org/licenses/LICENSE-2.0                            *
-*                                                                           *
-*  Unless required by applicable law or agreed to in writing, software      *
-*  distributed under the License is distributed on an "AS IS" BASIS,        *
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. *
-*  See the License for the specific language governing permissions and      *
-*  limitations under the License.                                           *
-*                                                                           *
-****************************************************************************/
+ *  Copyright 2021 Gorgon Meducer (Email:embedded_zhuoran@hotmail.com)       *
+ *                                                                           *
+ *  Licensed under the Apache License, Version 2.0 (the "License");          *
+ *  you may not use this file except in compliance with the License.         *
+ *  You may obtain a copy of the License at                                  *
+ *                                                                           *
+ *     http://www.apache.org/licenses/LICENSE-2.0                            *
+ *                                                                           *
+ *  Unless required by applicable law or agreed to in writing, software      *
+ *  distributed under the License is distributed on an "AS IS" BASIS,        *
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. *
+ *  See the License for the specific language governing permissions and      *
+ *  limitations under the License.                                           *
+ *                                                                           *
+ ****************************************************************************/
 /*============================ INCLUDES ======================================*/
 #include "pico/stdlib.h"
 #include "perf_counter.h"
@@ -28,35 +28,33 @@
 
 #include "RTE_Components.h"
 #if defined(RTE_Compiler_EventRecorder) && defined(RTE_Compiler_IO_STDOUT_EVR)
-#   include <EventRecorder.h>
+#include <EventRecorder.h>
 #endif
 
 #if defined(RTE_Script_PikaScript)
-#   include "pikaScript.h"
+#include "pikaScript.h"
 #endif
 
 #if defined(__RTE_ACCELERATION_ARM_2D__) || defined(RTE_Acceleration_Arm_2D)
-#   include "arm_2d.h"
-#   include "arm_2d_helper.h"
-#   include "arm_2d_disp_adapters.h"
-#   include "arm_2d_scenes.h"
+#include "arm_2d.h"
+#include "arm_2d_helper.h"
+#include "arm_2d_disp_adapters.h"
+#include "arm_2d_scenes.h"
 #endif
 
-#if     defined(__RTE_ACCELERATION_ARM_2D_EXTRA_BENCHMARK_WATCH_PANEL__)            \
-    ||  defined(__RTE_ACCELERATION_ARM_2D_EXTRA_BENCHMARK_GENERIC__)
-#   include "arm_2d_benchmark.h"
+#if defined(__RTE_ACCELERATION_ARM_2D_EXTRA_BENCHMARK_WATCH_PANEL__) || defined(__RTE_ACCELERATION_ARM_2D_EXTRA_BENCHMARK_GENERIC__)
+#include "arm_2d_benchmark.h"
 #endif
 /*============================ MACROS ========================================*/
-#define TOP         (0x1FFF)
+#define TOP (0x1FFF)
 
 /*============================ MACROFIED FUNCTIONS ===========================*/
 #ifndef ABS
-#   define ABS(__N)    ((__N) < 0 ? -(__N) : (__N))
+#define ABS(__N) ((__N) < 0 ? -(__N) : (__N))
 #endif
 #ifndef _BV
-#   define _BV(__N)    ((uint32_t)1<<(__N))
+#define _BV(__N) ((uint32_t)1 << (__N))
 #endif
-
 
 /*============================ TYPES =========================================*/
 /*============================ GLOBAL VARIABLES ==============================*/
@@ -66,7 +64,6 @@
 
 void SysTick_Handler(void)
 {
-
 }
 
 /*! \brief set the 16-level led gradation
@@ -76,13 +73,16 @@ void SysTick_Handler(void)
 static void set_led_gradation(uint16_t hwLevel)
 {
     static uint16_t s_hwCounter = 0;
-    
-    if (hwLevel >= s_hwCounter) {
+
+    if (hwLevel >= s_hwCounter)
+    {
         gpio_put(PICO_DEFAULT_LED_PIN, 1);
-    } else {
+    }
+    else
+    {
         gpio_put(PICO_DEFAULT_LED_PIN, 0);
     }
-    
+
     s_hwCounter++;
     s_hwCounter &= TOP;
 }
@@ -91,15 +91,17 @@ static void breath_led(void)
 {
     static uint16_t s_hwCounter = 0;
     static int16_t s_nGray = (TOP >> 1);
-    
+
     s_hwCounter++;
-    if (!(s_hwCounter & (_BV(10)-1))) {
-        s_nGray++; 
-        if (s_nGray == TOP) {
+    if (!(s_hwCounter & (_BV(10) - 1)))
+    {
+        s_nGray++;
+        if (s_nGray == TOP)
+        {
             s_nGray = 0;
         }
     }
-    
+
     set_led_gradation(ABS(s_nGray - (TOP >> 1)));
 }
 
@@ -108,10 +110,10 @@ static void system_init(void)
     extern void SystemCoreClockUpdate();
 
     SystemCoreClockUpdate();
-    /*! \note if you do want to use SysTick in your application, please use 
-     *!       init_cycle_counter(true); 
-     *!       instead of 
-     *!       init_cycle_counter(false); 
+    /*! \note if you do want to use SysTick in your application, please use
+     *!       init_cycle_counter(true);
+     *!       instead of
+     *!       init_cycle_counter(false);
      */
     init_cycle_counter(false);
 
@@ -119,106 +121,110 @@ static void system_init(void)
     EventRecorderInitialize(0, 1);
 #endif
     stdio_init_all();
-    
+
     gpio_init(PICO_DEFAULT_LED_PIN);
     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
 #if defined(__PICO_USE_LCD_1IN3__) && __PICO_USE_LCD_1IN3__
     DEV_Delay_ms(100);
 
-    if(DEV_Module_Init()!=0){
-        //assert(0);
+    if (DEV_Module_Init() != 0)
+    {
+        // assert(0);
     }
-   
+
     DEV_SET_PWM(50);
     /* LCD Init */
-    
+
     LCD_1IN3_Init(HORIZONTAL);
     LCD_1IN3_Clear(GLCD_COLOR_BLUE);
-    
-    for (int n = 0; n < KEY_NUM; n++) {
+
+    for (int n = 0; n < KEY_NUM; n++)
+    {
         dev_key_init(n);
     }
 #endif
-
-    
 }
 
-int main(void) 
+int main(void)
 {
     system_init();
 
-    __cycleof__("printf") {
+    __cycleof__("printf")
+    {
         printf("Hello Pico-Template\r\n");
     }
-    
+
 #if defined(RTE_Script_PikaScript)
     pikaScriptInit();
 #endif
 
-#if defined( __PERF_COUNTER_COREMARK__ ) && __PERF_COUNTER_COREMARK__
+#if defined(__PERF_COUNTER_COREMARK__) && __PERF_COUNTER_COREMARK__
     printf("\r\nRun Coremark 1.0...\r\n");
     coremark_main();
 #endif
 
-#if     defined(__RTE_ACCELERATION_ARM_2D_EXTRA_BENCHMARK_WATCH_PANEL__)            \
-    ||  defined(__RTE_ACCELERATION_ARM_2D_EXTRA_BENCHMARK_GENERIC__)
+#if defined(__RTE_ACCELERATION_ARM_2D_EXTRA_BENCHMARK_WATCH_PANEL__) || defined(__RTE_ACCELERATION_ARM_2D_EXTRA_BENCHMARK_GENERIC__)
     arm_2d_run_benchmark();
 #endif
 
 #if defined(__RTE_ACCELERATION_ARM_2D__) || defined(RTE_Acceleration_Arm_2D)
     arm_2d_init();
     disp_adapter0_init();
-		
-		/* init game */
-		while (NULL == gameScene) {
-				gameScene = (user_scene_0_t *)malloc(sizeof(user_scene_0_t));
-		}
+
+    /* init game */
+    while (NULL == gameScene)
+    {
+        gameScene = (user_scene_0_t *)malloc(sizeof(user_scene_0_t));
+    }
     memset(gameScene, 0, sizeof(user_scene_0_t));
-		arm_2d_scene0_init(&DISP0_ADAPTER, gameScene);
-		
-		/* switch mode */
-    arm_2d_scene_player_set_switching_mode( 
+    arm_2d_scene0_init(&DISP0_ADAPTER, gameScene);
+
+    /* switch mode */
+    arm_2d_scene_player_set_switching_mode(
         &DISP0_ADAPTER,
         ARM_2D_SCENE_SWITCH_MODE_FADE_WHITE);
     /* inter 3000ms */
     arm_2d_scene_player_set_switching_period(
-        &DISP0_ADAPTER, 
+        &DISP0_ADAPTER,
         3000);
-		arm_2d_scene_player_switch_to_next_scene(&DISP0_ADAPTER);
+    arm_2d_scene_player_switch_to_next_scene(&DISP0_ADAPTER);
 #endif
 
-		// game start
-    while (true) {
-      breath_led();
-			int res = refreshgamew(gameScene, gameScene->scene_snake);
-			if( res > 0)
-			{
-					if(res == 2) gameScene->game_status = GAME_END;
-					if(res == 3) gameScene->game_status = GAME_WIN;
-			}
-			else 
-			{
-					gameScene->game_status = GAME_WRONG;
-			}
-			
-			// choose food
-			if (!gameScene->ffood) {
-					drawfoodw(gameScene->pfood, gameScene->scene_snake);
-					gameScene->ffood = True;
-			} 
-			gameScene->pfood->x=80;
-			gameScene->pfood->y=80;
-			// game restart
-			if(gameScene->game_status == GAME_END) 
-			{
-					destroysnake(gameScene->scene_snake);
-					gameScene->scene_snake = initsnake(); 
-			}
-			
+    // game start
+    while (true)
+    {
+        breath_led();
+        int res = refreshgamew(gameScene, gameScene->scene_snake);
+        if (res > 0)
+        {
+            if (res == 2)
+                gameScene->game_status = GAME_END;
+            if (res == 3)
+                gameScene->game_status = GAME_WIN;
+        }
+        else
+        {
+            gameScene->game_status = GAME_WRONG;
+        }
+
+        // choose food
+        if (gameScene->ffood == False)
+        {
+            drawfoodw(gameScene->pfood, gameScene->scene_snake);
+            gameScene->ffood = True;
+        }
+
+        // game restart
+        if (gameScene->game_status == GAME_END)
+        {
+            destroysnake(gameScene->scene_snake);
+            gameScene->scene_snake = initsnake();
+        }
+				// draw snake
 #if defined(__RTE_ACCELERATION_ARM_2D__) || defined(RTE_Acceleration_Arm_2D)
-      disp_adapter0_task();
+        disp_adapter0_task();
 #endif
     }
-    //return 0;
+    // return 0;
 }
